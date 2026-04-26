@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Управление пользователями</title>
+</head>
+<body>
+<h1>Список пользователей</h1>
+<a th:href="@{/admin/new}"><button>Добавить</button></a>
+<br/><br/>
+<table border="1">
+    <tr>
+        <th>ID</th><th>Логин</th><th>Имя</th><th>Фамилия</th><th>Email</th><th>Роли</th><th>Действия</th>
+    </tr>
+    <tr th:each="user : ${users}">
+        <td th:text="${user.id}">1</td>
+        <td th:text="${user.username}">login</td>
+        <td th:text="${user.firstName}">-</td>
+        <td th:text="${user.lastName}">-</td>
+        <td th:text="${user.email}">-</td>
+        <td>
+            <span th:each="role, iterStat : ${user.roles}"
+                  th:text="${role.name} + (${iterStat.last} ? '' : ', ')">ROLE</span>
+        </td>
+        <td>
+            <a th:href="@{/admin/edit/{id}(id=${user.id})}"><button>Редактировать</button></a>
+            <form th:action="@{/admin/{id}(id=${user.id})}" method="post" style="display:inline">
+                <input type="hidden" name="_method" value="delete"/>
+                <button type="submit" onclick="return confirm('Удалить пользователя?')">Удалить</button>
+            </form>
+        </td>
+    </tr>
+</table>
+<br/>
+<a href="/user">Моя страница</a> |
+<form th:action="@{/logout}" method="post" style="display:inline">
+    <button type="submit">Выйти</button>
+</form>
+</body>
+</html>
