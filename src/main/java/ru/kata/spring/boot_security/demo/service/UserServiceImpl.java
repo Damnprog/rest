@@ -21,9 +21,7 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     private final RoleService roleService;
     private final BCryptPasswordEncoder passwordEncoder;
 
-    public UserServiceImpl(UserRepository userRepository,
-                           RoleService roleService,
-                           BCryptPasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, RoleService roleService, BCryptPasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleService = roleService;
         this.passwordEncoder = passwordEncoder;
@@ -32,21 +30,18 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional(readOnly = true)
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByUsernameWithRoles(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + username));
+        return userRepository.findByUsernameWithRoles(username).orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден: " + username));
     }
 
     @Override
     @Transactional(readOnly = true)
     public User getUserByUsername(String username) {
-        return userRepository.findByUsernameWithRoles(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
+        return userRepository.findByUsernameWithRoles(username).orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
     }
 
     @Override
     @Transactional(readOnly = true)
     public List<User> findAll() {
-        // используем новый запрос, который сразу подгружает роли
         return userRepository.findAllWithRoles();
     }
 
@@ -70,15 +65,26 @@ public class UserServiceImpl implements UserService, UserDetailsService {
     @Override
     @Transactional
     public User update(User user, Set<Long> roleIds) {
-        User existing = userRepository.findByIdWithRoles(user.getId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        User existing = userRepository.findByIdWithRoles(user.getId()).orElseThrow(() -> new RuntimeException("User not found"));
         existing.setUsername(user.getUsername());
         existing.setFirstName(user.getFirstName());
         existing.setLastName(user.getLastName());
-        existing.setEmail(user.getEmail());
+        existing.setAge(user.getAge());
+
+
+        if (user.getEmail() != null && !user.getEmail().equals(existing.getEmail())) {
+            if (existing.getUsername().equals(existing.getEmail())) {
+                existing.setUsername(user.getEmail());
+            }
+            existing.setEmail(user.getEmail());
+        } else if (user.getEmail() != null) {
+            existing.setEmail(user.getEmail());
+        }
+
         if (user.getPassword() != null && !user.getPassword().isEmpty()) {
             existing.setPassword(passwordEncoder.encode(user.getPassword()));
         }
+
         if (roleIds != null) {
             existing.getRoles().clear();
             Set<Role> roles = roleService.findByIds(roleIds);

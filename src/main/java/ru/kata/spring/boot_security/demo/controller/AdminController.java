@@ -7,6 +7,7 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
+import java.security.Principal;
 import java.util.Set;
 
 @Controller
@@ -22,38 +23,28 @@ public class AdminController {
     }
 
     @GetMapping
-    public String listUsers(Model model) {
+    public String listUsers(Model model, Principal principal) {
         model.addAttribute("users", userService.findAll());
+        model.addAttribute("allRoles", roleService.findAll());
+
+        if (principal != null) {
+            User currentUser = userService.getUserByUsername(principal.getName());
+            model.addAttribute("currentUser", currentUser);
+        }
         return "admin/list";
     }
 
-    @GetMapping("/new")
-    public String newUserForm(Model model) {
-        model.addAttribute("user", new User());
-        model.addAttribute("allRoles", roleService.findAll());
-        return "admin/new";
-    }
-
     @PostMapping
-    public String createUser(@ModelAttribute User user,
-                             @RequestParam("roleIds") Set<Long> roleIds) {
+    public String createUser(@ModelAttribute User user, @RequestParam("roleIds") Set<Long> roleIds) {
+        if (user.getUsername() == null || user.getUsername().isBlank()) {
+            user.setUsername(user.getEmail());
+        }
         userService.save(user, roleIds);
         return "redirect:/admin";
     }
 
-    @GetMapping("/edit/{id}")
-    public String editUserForm(@PathVariable Long id, Model model) {
-        User user = userService.findById(id)
-                .orElseThrow(() -> new RuntimeException("Пользователь не найден"));
-        model.addAttribute("user", user);
-        model.addAttribute("allRoles", roleService.findAll());
-        return "admin/edit";
-    }
-
     @PutMapping("/{id}")
-    public String updateUser(@PathVariable Long id,
-                             @ModelAttribute User user,
-                             @RequestParam("roleIds") Set<Long> roleIds) {
+    public String updateUser(@PathVariable Long id, @ModelAttribute User user, @RequestParam("roleIds") Set<Long> roleIds) {
         user.setId(id);
         userService.update(user, roleIds);
         return "redirect:/admin";

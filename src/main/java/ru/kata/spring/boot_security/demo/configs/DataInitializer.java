@@ -21,6 +21,7 @@ public class DataInitializer implements CommandLineRunner {
         this.userService = userService;
     }
 
+
     @Override
     @Transactional
     public void run(String... args) {
@@ -35,11 +36,12 @@ public class DataInitializer implements CommandLineRunner {
 
         if (userService.findAll().isEmpty()) {
             User admin = new User();
-            admin.setUsername("admin");
+            admin.setUsername("admin@example.com");
             admin.setPassword("admin");
-            admin.setFirstName("Admin");
-            admin.setLastName("Adminov");
+            admin.setFirstName("admin");
+            admin.setLastName("admin");
             admin.setEmail("admin@example.com");
+            admin.setAge(35);
             userService.save(admin, Set.of(adminRole.getId(), userRole.getId()));
         }
     }
