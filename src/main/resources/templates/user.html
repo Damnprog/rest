@@ -7,17 +7,29 @@
 </head>
 <body>
 
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+        <span class="navbar-text text-white"
+              th:utext="${currentUser.email} + ' with roles: ' + ${#strings.listJoin(currentUser.roles.![#this.name.replace('ROLE_','')], ' ')}">
+            user@mail.ru with roles: USER
+        </span>
+        <form th:action="@{/logout}" method="post" class="d-flex">
+            <button type="submit" class="btn btn-outline-light btn-sm">Logout</button>
+        </form>
+    </div>
+</nav>
+
 <div class="container-fluid">
     <div class="row">
-
+        <!-- Левая боковая панель -->
         <div class="col-auto p-0">
             <div th:replace="fragments :: sidebar(currentUser=${currentUser})"></div>
         </div>
 
-
+        <!-- Правый контент -->
         <div class="col p-4">
-            <h2 class="mb-4">User information</h2>
-
+            <h2>User information</h2>
+            <hr>
             <table class="table table-bordered table-striped">
                 <thead class="table-dark">
                 <tr>
@@ -38,7 +50,7 @@
                     <td th:text="${currentUser.email}">user@mail.ru</td>
                     <td>
                         <span th:each="role, iter : ${currentUser.roles}"
-                              th:text="${role.name} + (${iter.last}? '' : ', ')">USER</span>
+                              th:text="${role.name.replace('ROLE_','')} + (${iter.last}? '' : ', ')">USER</span>
                     </td>
                 </tr>
                 </tbody>

@@ -1,33 +1,38 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.w3.org/1999/xhtml">
+<html xmlns:th="http://www.thymeleaf.org">
 <body>
 
-<div th:fragment="sidebar(currentUser)" th:if="${currentUser != null}">
+<div th:fragment="sidebar(currentUser)" th:if="${currentUser != null}"
+     th:with="hasAdmin=${currentUser.roles.![name].contains('ROLE_ADMIN')}">
     <div class="d-flex flex-column p-3 bg-light border-end" style="width: 260px; min-height: 100vh;">
-
-
         <h5 class="mb-1" th:text="${currentUser.email}">admin@mail.ru</h5>
         <p class="text-muted mb-2">with roles:</p>
-
-
         <div class="mb-4">
-
             <div th:each="role : ${currentUser.roles}" class="mb-1">
-
-                <span th:if="${role.name == 'ROLE_ADMIN'}" class="badge bg-primary" th:text="${role.name}">ADMIN</span>
-
-                <span th:unless="${role.name == 'ROLE_ADMIN'}" th:text="${role.name}">USER</span>
+                <span th:if="${role.name == 'ROLE_ADMIN' or !hasAdmin}"
+                      class="badge bg-primary"
+                      th:text="${role.name.replace('ROLE_', '')}">ADMIN</span>
+                <span th:unless="${role.name == 'ROLE_ADMIN' or !hasAdmin}"
+                      th:text="${role.name.replace('ROLE_', '')}">USER</span>
             </div>
         </div>
+    </div>
+</div>
 
-
-        <div class="flex-grow-1"></div>
-
-
-        <form th:action="@{/logout}" method="post">
-            <button type="submit" class="btn btn-outline-danger btn-sm w-100">Logout</button>
-        </form>
-
+<div th:fragment="sidebarAdmin(currentUser)" th:if="${currentUser != null}">
+    <div class="d-flex flex-column p-3 bg-light border-end" style="width: 260px; min-height: 100vh;">
+        <ul class="nav nav-pills flex-column" id="sidebarTabs" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" id="admin-tab" data-bs-toggle="pill"
+                        data-bs-target="#adminContent" type="button" role="tab"
+                        aria-controls="adminContent" aria-selected="true">Admin</button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" id="user-tab" data-bs-toggle="pill"
+                        data-bs-target="#userContent" type="button" role="tab"
+                        aria-controls="userContent" aria-selected="false">User</button>
+            </li>
+        </ul>
     </div>
 </div>
 
